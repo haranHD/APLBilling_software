@@ -1,38 +1,55 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
-
-const getInitialBaseUrl = () => {
-  if (Platform.OS === 'web') {
-    // If running on web, use localhost:5000 or custom host
-    return 'http://localhost:5000/api';
-  } else if (Platform.OS === 'android') {
-    return 'http://10.0.2.2:5000/api';
-  } else {
-    return 'http://localhost:5000/api';
-  }
-};
-
-const DEFAULT_BASE_URL = getInitialBaseUrl();
+import Constants from 'expo-constants';
 
 export const API_BASE_URL_KEY = '@apl_api_base_url';
 
+export const getDefaultBaseUrl = () => {
+  // If environment variable is provided (e.g. production Vercel/EAS build)
+  if (process.env.EXPO_PUBLIC_API_URL) {
+    return process.env.EXPO_PUBLIC_API_URL;
+  }
+
+  if (Platform.OS === 'web') {
+    return 'http://localhost:5000/api';
+  }
+
+  // Auto-detect PC IP from Expo bundler host connection (for physical phones)
+  const hostUri =
+    Constants.expoConfig?.hostUri ||
+    Constants.manifest2?.extra?.expoGo?.debuggerHost ||
+    Constants.manifest?.debuggerHost;
+
+  if (hostUri) {
+    const ip = hostUri.split(':')[0];
+    if (ip && ip !== 'localhost' && ip !== '127.0.0.1' && !ip.includes('exp.direct')) {
+      return `http://${ip}:5000/api`;
+    }
+  }
+
+  // Fallback for Android emulator
+  if (Platform.OS === 'android') {
+    return 'http://10.0.2.2:5000/api';
+  }
+
+  return 'http://localhost:5000/api';
+};
+
 const api = axios.create({
-  baseURL: DEFAULT_BASE_URL,
+  baseURL: getDefaultBaseUrl(),
   timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Interceptor to attach Authorization Bearer token from AsyncStorage
+// Interceptor to dynamically set baseURL and Authorization Bearer token
 api.interceptors.request.use(
   async (config) => {
     try {
       const customUrl = await AsyncStorage.getItem(API_BASE_URL_KEY);
-      if (customUrl) {
-        config.baseURL = customUrl;
-      }
+      config.baseURL = customUrl || getDefaultBaseUrl();
 
       const token = await AsyncStorage.getItem('@apl_auth_token');
       if (token) {
@@ -88,14 +105,14 @@ export const reportService = {
   getExcelReportUrl: async (month) => {
     const token = await AsyncStorage.getItem('@apl_auth_token');
     const customUrl = await AsyncStorage.getItem(API_BASE_URL_KEY);
-    const base = customUrl || DEFAULT_BASE_URL;
+    const base = customUrl || getDefaultBaseUrl();
     const query = month ? `?month=${month}&token=${token}` : `?token=${token}`;
     return `${base}/reports/excel${query}`;
   },
   getPdfReportUrl: async (month) => {
     const token = await AsyncStorage.getItem('@apl_auth_token');
     const customUrl = await AsyncStorage.getItem(API_BASE_URL_KEY);
-    const base = customUrl || DEFAULT_BASE_URL;
+    const base = customUrl || getDefaultBaseUrl();
     const query = month ? `?month=${month}&token=${token}` : `?token=${token}`;
     return `${base}/reports/pdf${query}`;
   },

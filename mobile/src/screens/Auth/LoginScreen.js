@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   View,
   Text,
@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContext } from '../../context/AuthContext';
-import { API_BASE_URL_KEY } from '../../services/api';
+import { API_BASE_URL_KEY, getDefaultBaseUrl } from '../../services/api';
 import Header from '../../components/Header';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
@@ -35,6 +35,22 @@ const LoginScreen = () => {
   // Server IP Settings Modal
   const [serverModalVisible, setServerModalVisible] = useState(false);
   const [customServerUrl, setCustomServerUrl] = useState('');
+  const [currentBaseUrl, setCurrentBaseUrl] = useState(getDefaultBaseUrl());
+
+  useEffect(() => {
+    const loadCurrentUrl = async () => {
+      const saved = await AsyncStorage.getItem(API_BASE_URL_KEY);
+      if (saved) {
+        setCurrentBaseUrl(saved);
+        setCustomServerUrl(saved);
+      } else {
+        const def = getDefaultBaseUrl();
+        setCurrentBaseUrl(def);
+        setCustomServerUrl(def);
+      }
+    };
+    loadCurrentUrl();
+  }, [serverModalVisible]);
 
   const handleLogin = async () => {
     if (!username.trim() || !password.trim()) {
@@ -49,7 +65,14 @@ const LoginScreen = () => {
     setLoading(false);
 
     if (!result.success) {
-      setErrorMessage(result.error || t('auth.invalidCredentials'));
+      const err = result.error || '';
+      if (err.includes('Network Error') || err.includes('timeout') || err.includes('ECONNREFUSED')) {
+        setErrorMessage(
+          'Cannot connect to backend server. Make sure your backend is running and configure the Server IP below.'
+        );
+      } else {
+        setErrorMessage(result.error || t('auth.invalidCredentials'));
+      }
     }
   };
 
@@ -57,9 +80,11 @@ const LoginScreen = () => {
     try {
       if (customServerUrl.trim()) {
         await AsyncStorage.setItem(API_BASE_URL_KEY, customServerUrl.trim());
+        setCurrentBaseUrl(customServerUrl.trim());
         Alert.alert(t('common.success'), 'Server URL updated successfully!');
       } else {
         await AsyncStorage.removeItem(API_BASE_URL_KEY);
+        setCurrentBaseUrl(getDefaultBaseUrl());
         Alert.alert(t('common.success'), 'Server URL reset to default!');
       }
       setServerModalVisible(false);
@@ -133,13 +158,13 @@ const LoginScreen = () => {
                 style={styles.submitBtn}
               />
 
-              {/* Server Settings Link */}
+              {/* Server Settings Link & Indicator */}
               <TouchableOpacity
                 style={styles.serverConfigBtn}
                 onPress={() => setServerModalVisible(true)}
               >
                 <Ionicons name="server-outline" size={14} color={colors.textMuted} />
-                <Text style={styles.serverConfigText}>Configure Server IP / Host</Text>
+                <Text style={styles.serverConfigText}>Server: {currentBaseUrl}</Text>
               </TouchableOpacity>
             </Card>
           </View>
@@ -157,13 +182,13 @@ const LoginScreen = () => {
           <Card style={styles.serverModalCard}>
             <Text style={styles.modalHeader}>API Server IP Configuration</Text>
             <Text style={styles.modalNote}>
-              Set the backend API URL (e.g. http://localhost:5000/api):
+              Enter your computer's Wi-Fi IP address or live server URL (e.g. http://192.168.1.5:5000/api):
             </Text>
             <TextInput
               style={styles.serverInput}
               value={customServerUrl}
               onChangeText={setCustomServerUrl}
-              placeholder="http://localhost:5000/api"
+              placeholder="http://192.168.X.X:5000/api"
               placeholderTextColor={colors.textMuted}
               autoCapitalize="none"
               autoCorrect={false}
@@ -268,7 +293,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   serverConfigText: {
-    fontSize: 12,
+    fontSize: 11,
     color: colors.textMuted,
     textDecorationLine: 'underline',
   },
