@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+model VendorMaster {
+  id          String   @id @default(uuid())
+  vendorName  String   @unique
+  contactInfo String?
+  createdAt   DateTime @default(now())
+  bills       Bill[]
+}
+
+model FlowerMaster {
+  id         String   @id @default(uuid())
+  flowerName String   @unique
+  createdAt  DateTime @default(now())
+  bills      Bill[]
+}
+
+model Bill {
+  id          String       @id @default(uuid())
+  vendorId    String
+  flowerId    String
+  weightKg    Float
+  ratePerKg   Float
+  totalAmount Float
+  date        DateTime     @default(now())
+  createdAt   DateTime     @default(now())
+  
+  vendor      VendorMaster @relation(fields: [vendorId], references: [id])
+  flower      FlowerMaster @relation(fields: [flowerId], references: [id])
+}
