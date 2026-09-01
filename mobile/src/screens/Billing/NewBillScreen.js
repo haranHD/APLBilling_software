@@ -138,40 +138,181 @@ const NewBillScreen = () => {
   const handlePrintReceipt = async () => {
     if (!savedBill) return;
 
-    const dateFormatted = new Date(savedBill.date).toLocaleString();
+    const dateFormatted = new Date(savedBill.date).toLocaleDateString();
+    const timeFormatted = new Date(savedBill.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const billIdShort = savedBill.id ? savedBill.id.substring(0, 8).toUpperCase() : '001';
+
     const htmlContent = `
+      <!DOCTYPE html>
       <html>
         <head>
-          <title>APL Flower Bill - ${savedBill.id}</title>
+          <meta charset="utf-8" />
+          <title>APL BILL - ${billIdShort}</title>
           <style>
-            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 20px; text-align: center; color: #111; }
-            .ticket { border: 2px dashed #15803d; padding: 25px; border-radius: 12px; max-width: 380px; margin: auto; }
-            .header { color: #15803d; margin: 0 0 5px 0; font-size: 22px; }
-            .date { font-size: 12px; color: #666; margin-top: 0; }
-            hr { border: none; border-top: 1px solid #ddd; margin: 15px 0; }
-            table { width: 100%; text-align: left; font-size: 14px; line-height: 26px; }
-            .right { text-align: right; }
-            .total-row { display: flex; justify-content: space-between; font-size: 18px; font-weight: bold; color: #15803d; margin-top: 10px; }
-            .footer { font-size: 11px; color: #888; margin-top: 25px; }
+            * { box-sizing: border-box; margin: 0; padding: 0; }
+            body {
+              font-family: Arial, Helvetica, sans-serif;
+              padding: 24px;
+              color: #111827;
+              background-color: #ffffff;
+            }
+            .bill-wrapper {
+              max-width: 550px;
+              margin: 0 auto;
+              border: 2px solid #15803d;
+              border-radius: 10px;
+              padding: 20px;
+            }
+            .header-banner {
+              text-align: center;
+              border-bottom: 2px solid #15803d;
+              padding-bottom: 12px;
+              margin-bottom: 14px;
+            }
+            .main-title {
+              font-size: 32px;
+              font-weight: 900;
+              color: #15803d;
+              letter-spacing: 2px;
+            }
+            .subtitle {
+              font-size: 13px;
+              font-weight: bold;
+              color: #374151;
+              text-transform: uppercase;
+              margin-top: 2px;
+            }
+            .tagline {
+              font-size: 11px;
+              color: #6b7280;
+              margin-top: 2px;
+            }
+            .meta-grid {
+              display: flex;
+              justify-content: space-between;
+              font-size: 12px;
+              margin-bottom: 16px;
+              background-color: #f9fafb;
+              padding: 10px;
+              border-radius: 6px;
+              border: 1px solid #e5e7eb;
+            }
+            .meta-col { line-height: 1.6; }
+            .meta-label { color: #6b7280; font-weight: 600; }
+            .meta-value { font-weight: bold; color: #111827; }
+
+            /* Table Styles */
+            .bill-table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-bottom: 16px;
+              font-size: 13px;
+            }
+            .bill-table th {
+              background-color: #15803d;
+              color: #ffffff;
+              font-weight: 700;
+              padding: 10px 8px;
+              text-align: left;
+              border: 1px solid #15803d;
+            }
+            .bill-table td {
+              padding: 10px 8px;
+              border: 1px solid #d1d5db;
+              vertical-align: middle;
+            }
+            .bill-table tr:nth-child(even) {
+              background-color: #f9fafb;
+            }
+            .text-center { text-align: center; }
+            .text-right { text-align: right; }
+            .total-row td {
+              background-color: #dcfce7 !important;
+              font-size: 15px;
+              font-weight: 800;
+              color: #15803d;
+              border-top: 2px solid #15803d;
+              border-bottom: 2px solid #15803d;
+            }
+
+            .footer-section {
+              text-align: center;
+              margin-top: 20px;
+              padding-top: 12px;
+              border-top: 1px dashed #d1d5db;
+              font-size: 11px;
+              color: #6b7280;
+            }
+            .signature-box {
+              display: flex;
+              justify-content: space-between;
+              margin-top: 30px;
+              padding: 0 10px;
+              font-size: 12px;
+              font-weight: bold;
+              color: #374151;
+            }
           </style>
         </head>
         <body>
-          <div class="ticket">
-            <h2 class="header">APL FLOWER BILLING</h2>
-            <p class="date">Date: ${dateFormatted}</p>
-            <hr />
-            <table>
-              <tr><td><strong>Vendor:</strong></td><td class="right">${savedBill.vendor?.vendorName || 'N/A'}</td></tr>
-              <tr><td><strong>Flower:</strong></td><td class="right">${savedBill.flower?.flowerName || 'N/A'}</td></tr>
-              <tr><td><strong>Weight:</strong></td><td class="right">${savedBill.weightKg} kg</td></tr>
-              <tr><td><strong>Rate / kg:</strong></td><td class="right">Rs. ${Number(savedBill.ratePerKg).toFixed(2)}</td></tr>
-            </table>
-            <hr />
-            <div class="total-row">
-              <span>TOTAL AMOUNT:</span>
-              <span>Rs. ${Number(savedBill.totalAmount).toFixed(2)}</span>
+          <div class="bill-wrapper">
+            <!-- APL Header -->
+            <div class="header-banner">
+              <div class="main-title">APL</div>
+              <div class="subtitle">FLOWER MERCHANTS & COMMISSION AGENT</div>
+              <div class="tagline">Daily Flower Import & Billing Receipt</div>
             </div>
-            <p class="footer">Thank you for your business!</p>
+
+            <!-- Meta Details -->
+            <div class="meta-grid">
+              <div class="meta-col">
+                <div><span class="meta-label">Bill No:</span> <span class="meta-value">#${billIdShort}</span></div>
+                <div><span class="meta-label">Vendor:</span> <span class="meta-value">${savedBill.vendor?.vendorName || 'N/A'}</span></div>
+                <div><span class="meta-label">Contact:</span> <span class="meta-value">${savedBill.vendor?.contactInfo || '-'}</span></div>
+              </div>
+              <div class="meta-col text-right">
+                <div><span class="meta-label">Date:</span> <span class="meta-value">${dateFormatted}</span></div>
+                <div><span class="meta-label">Time:</span> <span class="meta-value">${timeFormatted}</span></div>
+              </div>
+            </div>
+
+            <!-- Structured Table (Row/Column Style) -->
+            <table class="bill-table">
+              <thead>
+                <tr>
+                  <th class="text-center" style="width: 10%;">S.No</th>
+                  <th style="width: 40%;">Item / Flower Variety</th>
+                  <th class="text-right" style="width: 15%;">Weight</th>
+                  <th class="text-right" style="width: 15%;">Rate (₹)</th>
+                  <th class="text-right" style="width: 20%;">Total (₹)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="text-center">1</td>
+                  <td><strong>${savedBill.flower?.flowerName || 'N/A'}</strong></td>
+                  <td class="text-right">${Number(savedBill.weightKg).toFixed(2)} kg</td>
+                  <td class="text-right">₹ ${Number(savedBill.ratePerKg).toFixed(2)}</td>
+                  <td class="text-right" style="font-weight: 700;">₹ ${Number(savedBill.totalAmount).toFixed(2)}</td>
+                </tr>
+                <!-- Grand Total Row -->
+                <tr class="total-row">
+                  <td colspan="4" class="text-right">GRAND TOTAL:</td>
+                  <td class="text-right">₹ ${Number(savedBill.totalAmount).toFixed(2)}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Signatures -->
+            <div class="signature-box">
+              <div>Customer / Vendor Signature</div>
+              <div>Authorized Signatory (APL)</div>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer-section">
+              <p>நன்றி / Thank you for your business!</p>
+            </div>
           </div>
         </body>
       </html>
@@ -180,7 +321,7 @@ const NewBillScreen = () => {
     try {
       if (Platform.OS === 'web') {
         if (typeof window !== 'undefined') {
-          const printWindow = window.open('', '', 'width=600,height=600');
+          const printWindow = window.open('', '', 'width=700,height=750');
           if (printWindow) {
             printWindow.document.write(htmlContent);
             printWindow.document.close();
@@ -310,43 +451,59 @@ const NewBillScreen = () => {
       >
         <View style={styles.modalOverlay}>
           <Card style={styles.receiptCard}>
+            {/* APL Main Header */}
             <View style={styles.receiptHeader}>
-              <Ionicons name="checkmark-circle" size={48} color={colors.primary} />
-              <Text style={styles.receiptTitle}>{t('billing.billCreated')}</Text>
+              <Text style={styles.receiptMainTitle}>APL</Text>
+              <Text style={styles.receiptSubTitle}>FLOWER MERCHANTS & BILLING</Text>
               <Text style={styles.receiptDate}>
                 {savedBill && new Date(savedBill.date).toLocaleString()}
               </Text>
             </View>
 
-            <View style={styles.receiptBody}>
-              <View style={styles.receiptRow}>
-                <Text style={styles.receiptRowLabel}>{t('vendors.vendorName')}:</Text>
-                <Text style={styles.receiptRowValue}>{savedBill?.vendor?.vendorName}</Text>
+            {/* Vendor Info Banner */}
+            <View style={styles.vendorInfoBanner}>
+              <Text style={styles.vendorInfoName}>{savedBill?.vendor?.vendorName || 'N/A'}</Text>
+              {savedBill?.vendor?.contactInfo ? (
+                <Text style={styles.vendorInfoContact}>📞 {savedBill?.vendor?.contactInfo}</Text>
+              ) : null}
+            </View>
+
+            {/* Table Row / Column Format */}
+            <View style={styles.tableContainer}>
+              {/* Table Header Row */}
+              <View style={styles.tableHeaderRow}>
+                <Text style={[styles.tableHeaderCell, { flex: 2 }]}>Flower</Text>
+                <Text style={[styles.tableHeaderCell, styles.textRight, { flex: 1 }]}>Weight</Text>
+                <Text style={[styles.tableHeaderCell, styles.textRight, { flex: 1 }]}>Rate/Kg</Text>
+                <Text style={[styles.tableHeaderCell, styles.textRight, { flex: 1.2 }]}>Total</Text>
               </View>
 
-              <View style={styles.receiptRow}>
-                <Text style={styles.receiptRowLabel}>{t('flowers.flowerName')}:</Text>
-                <Text style={styles.receiptRowValue}>{savedBill?.flower?.flowerName}</Text>
+              {/* Table Data Row */}
+              <View style={styles.tableDataRow}>
+                <Text style={[styles.tableDataCell, { flex: 2, fontWeight: '700' }]} numberOfLines={1}>
+                  🌸 {savedBill?.flower?.flowerName || 'N/A'}
+                </Text>
+                <Text style={[styles.tableDataCell, styles.textRight, { flex: 1 }]}>
+                  {savedBill?.weightKg} kg
+                </Text>
+                <Text style={[styles.tableDataCell, styles.textRight, { flex: 1 }]}>
+                  ₹{savedBill?.ratePerKg}
+                </Text>
+                <Text style={[styles.tableDataCell, styles.textRight, { flex: 1.2, fontWeight: '700' }]}>
+                  ₹{Number(savedBill?.totalAmount || 0).toFixed(2)}
+                </Text>
               </View>
 
-              <View style={styles.receiptRow}>
-                <Text style={styles.receiptRowLabel}>{t('billing.weightLabel')}:</Text>
-                <Text style={styles.receiptRowValue}>{savedBill?.weightKg} kg</Text>
-              </View>
-
-              <View style={styles.receiptRow}>
-                <Text style={styles.receiptRowLabel}>{t('billing.rateLabel')}:</Text>
-                <Text style={styles.receiptRowValue}>₹{savedBill?.ratePerKg}/kg</Text>
-              </View>
-
-              <View style={[styles.receiptRow, styles.receiptTotalRow]}>
-                <Text style={styles.receiptTotalLabel}>{t('billing.totalAmount')}:</Text>
-                <Text style={styles.receiptTotalValue}>
+              {/* Table Grand Total Row */}
+              <View style={styles.tableTotalRow}>
+                <Text style={styles.tableTotalLabel}>GRAND TOTAL:</Text>
+                <Text style={styles.tableTotalValue}>
                   ₹{Number(savedBill?.totalAmount || 0).toFixed(2)}
                 </Text>
               </View>
             </View>
 
+            {/* Action Buttons */}
             <View style={styles.receiptActions}>
               <Button
                 title={t('billing.printOrShare')}
@@ -424,60 +581,104 @@ const styles = StyleSheet.create({
   },
   receiptCard: {
     width: '100%',
-    maxWidth: 420,
+    maxWidth: 460,
     padding: 20,
     borderRadius: 18,
   },
   receiptHeader: {
     alignItems: 'center',
-    marginBottom: 16,
+    paddingBottom: 10,
+    borderBottomWidth: 1.5,
+    borderBottomColor: colors.primary,
+    marginBottom: 12,
   },
-  receiptTitle: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: colors.textPrimary,
-    marginTop: 8,
+  receiptMainTitle: {
+    fontSize: 28,
+    fontWeight: '900',
+    color: colors.primary,
+    letterSpacing: 2,
   },
-  receiptDate: {
+  receiptSubTitle: {
     fontSize: 12,
-    color: colors.textMuted,
+    fontWeight: '700',
+    color: colors.textSecondary,
+    textTransform: 'uppercase',
     marginTop: 2,
   },
-  receiptBody: {
+  receiptDate: {
+    fontSize: 11,
+    color: colors.textMuted,
+    marginTop: 4,
+  },
+  vendorInfoBanner: {
     backgroundColor: colors.background,
-    borderRadius: 10,
-    padding: 14,
-    marginBottom: 18,
+    padding: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+    marginBottom: 12,
   },
-  receiptRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 6,
-  },
-  receiptRowLabel: {
-    fontSize: 13,
-    color: colors.textSecondary,
-  },
-  receiptRowValue: {
+  vendorInfoName: {
     fontSize: 14,
     fontWeight: '700',
     color: colors.textPrimary,
   },
-  receiptTotalRow: {
-    borderTopWidth: 1,
-    borderTopColor: colors.borderDark,
-    marginTop: 8,
-    paddingTop: 10,
+  vendorInfoContact: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginTop: 2,
   },
-  receiptTotalLabel: {
-    fontSize: 14,
+  tableContainer: {
+    borderWidth: 1,
+    borderColor: colors.borderDark,
+    borderRadius: 8,
+    overflow: 'hidden',
+    marginBottom: 16,
+  },
+  tableHeaderRow: {
+    flexDirection: 'row',
+    backgroundColor: colors.primary,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+  },
+  tableHeaderCell: {
+    color: colors.textWhite,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  tableDataRow: {
+    flexDirection: 'row',
+    backgroundColor: colors.cardBg,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+    alignItems: 'center',
+  },
+  tableDataCell: {
+    color: colors.textPrimary,
+    fontSize: 13,
+  },
+  tableTotalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    backgroundColor: colors.primarySubtle,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    alignItems: 'center',
+  },
+  tableTotalLabel: {
+    fontSize: 13,
     fontWeight: '800',
     color: colors.primaryDark,
   },
-  receiptTotalValue: {
-    fontSize: 18,
-    fontWeight: '800',
+  tableTotalValue: {
+    fontSize: 16,
+    fontWeight: '900',
     color: colors.primaryDark,
+  },
+  textRight: {
+    textAlign: 'right',
   },
   receiptActions: {
     flexDirection: 'row',
