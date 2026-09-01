@@ -292,7 +292,6 @@ const VendorMasterScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    minHeight: Platform.OS === 'web' ? '100vh' : '100%',
     backgroundColor: colors.background,
   },
   content: {

@@ -149,7 +149,10 @@ const ReportsScreen = () => {
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <Header title={t('reports.title')} />
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+      >
         <View style={styles.responsiveContainer}>
           {/* Month Selector Carousel / Horizontal Pills */}
           <Text style={styles.sectionHeader}>{t('reports.selectMonth')}</Text>
@@ -257,12 +260,14 @@ const ReportsScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    minHeight: Platform.OS === 'web' ? '100vh' : '100%',
     backgroundColor: colors.background,
+  },
+  scrollView: {
+    flex: 1,
   },
   scrollContent: {
     padding: 16,
-    paddingBottom: 36,
+    paddingBottom: 24,
   },
   responsiveContainer: {
     width: '100%',

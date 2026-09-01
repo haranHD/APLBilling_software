@@ -52,13 +52,24 @@ const MainTabs = () => {
         tabBarStyle: {
           backgroundColor: colors.cardBg,
           borderTopColor: colors.border,
-          height: Platform.OS === 'web' ? 68 : 62,
+          borderTopWidth: 1,
+          height: Platform.OS === 'web' ? 68 : 64,
           paddingBottom: Platform.OS === 'web' ? 12 : 8,
-          paddingTop: 6,
+          paddingTop: 8,
+          zIndex: 100,
+          elevation: 10,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -3 },
+          shadowOpacity: 0.08,
+          shadowRadius: 5,
         },
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: '700',
+          marginTop: 2,
+        },
+        tabBarItemStyle: {
+          paddingVertical: 2,
         },
       }}
     >
@@ -70,7 +81,7 @@ const MainTabs = () => {
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons
               name={focused ? 'grid' : 'grid-outline'}
-              size={size}
+              size={22}
               color={color}
             />
           ),
@@ -85,7 +96,7 @@ const MainTabs = () => {
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons
               name={focused ? 'receipt' : 'receipt-outline'}
-              size={size}
+              size={22}
               color={color}
             />
           ),
@@ -100,7 +111,7 @@ const MainTabs = () => {
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons
               name={focused ? 'people' : 'people-outline'}
-              size={size}
+              size={22}
               color={color}
             />
           ),
@@ -115,7 +126,7 @@ const MainTabs = () => {
           tabBarIcon: ({ color, size, focused }) => (
             <MaterialCommunityIcons
               name={focused ? 'flower' : 'flower-outline'}
-              size={size + 2}
+              size={24}
               color={color}
             />
           ),
@@ -130,7 +141,7 @@ const MainTabs = () => {
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons
               name={focused ? 'document-text' : 'document-text-outline'}
-              size={size}
+              size={22}
               color={color}
             />
           ),
@@ -176,7 +187,6 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     height: '100%',
-    minHeight: 400,
     backgroundColor: colors.background,
     justifyContent: 'center',
     alignItems: 'center',

@@ -5,27 +5,28 @@ import { AuthProvider } from './src/context/AuthContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import { loadSavedLanguage } from './src/i18n';
 
-// Inject full-height root CSS on Web to guarantee 100vh viewports
+// Inject full-height root CSS on Web with clean viewport containment
 if (Platform.OS === 'web' && typeof document !== 'undefined') {
   const style = document.createElement('style');
   style.textContent = `
     html, body, #root {
       height: 100%;
-      min-height: 100vh;
       width: 100%;
       margin: 0;
       padding: 0;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
       background-color: #f8fafc;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
     #root > div {
-      min-height: 100vh;
+      height: 100%;
       width: 100%;
       display: flex;
       flex-direction: column;
       flex: 1;
+      overflow: hidden;
     }
   `;
   document.head.appendChild(style);
@@ -53,13 +54,6 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     height: '100%',
-    ...(Platform.OS === 'web'
-      ? {
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          backgroundColor: '#f8fafc',
-        }
-      : {}),
+    backgroundColor: '#f8fafc',
   },
 });

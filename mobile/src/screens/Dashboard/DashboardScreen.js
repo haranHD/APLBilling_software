@@ -68,6 +68,7 @@ const DashboardScreen = () => {
       <Header title={t('dashboard.title')} />
 
       <ScrollView
+        style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
@@ -195,12 +196,14 @@ const DashboardScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    minHeight: Platform.OS === 'web' ? '100vh' : '100%',
     backgroundColor: colors.background,
+  },
+  scrollView: {
+    flex: 1,
   },
   scrollContent: {
     padding: 16,
-    paddingBottom: 32,
+    paddingBottom: 24,
   },
   responsiveContainer: {
     width: '100%',

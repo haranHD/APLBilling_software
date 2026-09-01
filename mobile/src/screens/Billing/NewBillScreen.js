@@ -350,6 +350,7 @@ const NewBillScreen = () => {
         style={{ flex: 1 }}
       >
         <ScrollView
+          style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
@@ -528,11 +529,14 @@ const NewBillScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    minHeight: Platform.OS === 'web' ? '100vh' : '100%',
     backgroundColor: colors.background,
+  },
+  scrollView: {
+    flex: 1,
   },
   scrollContent: {
     padding: 16,
+    paddingBottom: 24,
   },
   responsiveContainer: {
     width: '100%',
